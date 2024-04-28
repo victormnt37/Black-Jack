@@ -26,24 +26,52 @@ public class Deck : MonoBehaviour
         ShuffleCards();
         StartGame();        
     }
-
     private void InitCardValues()
     {
-        /*TODO:
-         * Asignar un valor a cada una de las 52 cartas del atributo "values".
-         * En principio, la posición de cada valor se deberá corresponder con la posición de faces. 
-         * Por ejemplo, si en faces[1] hay un 2 de corazones, en values[1] debería haber un 2.
-         */
-    }
+        for (int i = 0; i < faces.Length; i++)
+        {
+            int cardNumber = i % 13; // Determina el número de la carta (0-12)
 
+
+            if (cardNumber==0 || cardNumber ==13 || cardNumber ==26 || cardNumber ==39) 
+            {
+                values[i] = 11;
+            }
+            else if(cardNumber < 9)
+            {
+                values[i] = cardNumber + 1; // Las cartas del 2 al 10 tienen el valor de su número
+            }
+            else
+            {
+                values[i] = 10; // Las cartas J, Q, K tienen valor 10
+            }
+        }
+    }
     private void ShuffleCards()
     {
-        /*TODO:
-         * Barajar las cartas aleatoriamente.
-         * El método Random.Range(0,n), devuelve un valor entre 0 y n-1
-         * Si lo necesitas, puedes definir nuevos arrays.
-         */       
+        System.Random rng = new System.Random();
+        int n = faces.Length;
+        while (n > 1)
+        {
+            n--;
+
+            // Generamos un número aleatorio en el rango [0, n]
+            int k = rng.Next(n + 1);
+
+            // Guardamos temporalmente la cara de la carta en la posición k
+            Sprite tempFace = faces[k];
+            int tempValue = values[k];
+
+            // Intercambiamos la cara de la carta en la posición k con la cara de la carta en la posición n
+            faces[k] = faces[n];
+            values[k] = values[n];
+
+            // Colocamos la carta temporalmente guardada en la posición n
+            faces[n] = tempFace;
+            values[n] = tempValue;
+        }
     }
+
 
     void StartGame()
     {
@@ -55,6 +83,11 @@ public class Deck : MonoBehaviour
              * Si alguno de los dos obtiene Blackjack, termina el juego y mostramos mensaje
              */
         }
+        if (player.GetComponent<CardHand>().points == 21 || dealer.GetComponent<CardHand>().points == 21)
+        {
+            EndGame();
+        }
+
     }
 
     private void CalculateProbabilities()
@@ -95,25 +128,32 @@ public class Deck : MonoBehaviour
         //Repartimos carta al jugador
         PushPlayer();
 
-        /*TODO:
-         * Comprobamos si el jugador ya ha perdido y mostramos mensaje
-         */      
+        // Comprobar si el jugador se pasa de 21
+        int playerPoints = player.GetComponent<CardHand>().points;
+        if (playerPoints > 21)
+        {
+            // El jugador se pasa de 21, terminar el juego
+            EndGame();
+        }
+
 
     }
 
     public void Stand()
     {
-        /*TODO: 
-         * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
-         */
+        // Bloquear el botón "Hit"
+        hitButton.interactable = false;
 
-        /*TODO:
-         * Repartimos cartas al dealer si tiene 16 puntos o menos
-         * El dealer se planta al obtener 17 puntos o más
-         * Mostramos el mensaje del que ha ganado
-         */                
-         
+        // Repartir cartas al crupier si tiene 16 puntos o menos
+        while (dealer.GetComponent<CardHand>().points <= 16)
+        {
+            PushDealer();
+        }
+
+        // Finalizar el juego
+        EndGame();
     }
+
 
     public void PlayAgain()
     {
@@ -126,5 +166,41 @@ public class Deck : MonoBehaviour
         ShuffleCards();
         StartGame();
     }
-    
+    void EndGame()
+    {
+        // Desactivar los botones de hit y stand
+        hitButton.interactable = false;
+        stickButton.interactable = false;
+
+        // Mostrar la carta oculta del crupier
+        dealer.GetComponent<CardHand>().InitialToggle();
+
+        // Obtener las puntuaciones del jugador y el crupier
+        int playerPoints = player.GetComponent<CardHand>().points;
+        int dealerPoints = dealer.GetComponent<CardHand>().points;
+
+        // Mostrar por pantalla quién ha ganado
+        if (playerPoints > 21)
+        {
+            finalMessage.text = "El dealer ha ganado."; // El jugador se pasa de 21
+        }
+        else if (dealerPoints > 21)
+        {
+            finalMessage.text = "El jugador ha ganado."; // El crupier se pasa de 21
+        }
+        else if (playerPoints > dealerPoints)
+        {
+            finalMessage.text = "El jugador ha ganado."; // El jugador tiene más puntos que el crupier
+        }
+        else if (playerPoints < dealerPoints)
+        {
+            finalMessage.text = "El dealer ha ganado."; // El crupier tiene más puntos que el jugador
+        }
+        else
+        {
+            finalMessage.text = "Empate."; // Ambos tienen la misma cantidad de puntos
+        }
+    }
+
+
 }
