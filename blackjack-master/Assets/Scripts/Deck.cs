@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class Deck : MonoBehaviour
@@ -11,6 +12,7 @@ public class Deck : MonoBehaviour
     public Button playAgainButton;
     public Text finalMessage;
     public Text probMessage;
+
 
     public int[] values = new int[52];
     int cardIndex = 0;    
@@ -92,13 +94,106 @@ public class Deck : MonoBehaviour
 
     private void CalculateProbabilities()
     {
-        /*TODO:
-         * Calcular las probabilidades de:
-         * - Teniendo la carta oculta, probabilidad de que el dealer tenga más puntuación que el jugador
-         * - Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta
-         * - Probabilidad de que el jugador obtenga más de 21 si pide una carta          
-         */
+        // Obtener la puntuación actual del jugador y la carta visible del crupier
+        int playerPoints = player.GetComponent<CardHand>().points;
+        if (dealer.GetComponent<CardHand>().cards.Count >1)
+        {
+
+
+            // Calcular la probabilidad de que el crupier tenga más puntuación que el jugador
+            float probabilityDealerWins = CalculateProbabilityDealerWins(playerPoints);
+
+            // Calcular la probabilidad de que el jugador obtenga entre 17 y 21 si pide una carta
+            float probabilityPlayer17to21 = CalculateProbabilityPlayer17to21(playerPoints);
+
+            // Calcular la probabilidad de que el jugador obtenga más de 21 si pide una carta
+            float probabilityPlayerBust = CalculateProbabilityPlayerBust(playerPoints);
+
+            // Actualizar el texto del objeto de texto con las probabilidades calculadas
+            probMessage.text = "Probabilidad de que el dealer tenga más puntuación que el jugador: " + probabilityDealerWins.ToString("P2") +
+                            "\nProbabilidad de que el jugador obtenga entre 17 y 21: " + probabilityPlayer17to21.ToString("P2") +
+                            "\nProbabilidad de que el jugador obtenga más de 21: " + probabilityPlayerBust.ToString("P2");
+        }
     }
+
+    public float CalculateProbabilityDealerWins(int playerPoints)
+    {
+        int dealerVisibleCardValue = dealer.GetComponent<CardHand>().cards[1].GetComponent<CardModel>().value;
+        int dealerHiddenCardValue = dealer.GetComponent<CardHand>().cards[0].GetComponent<CardModel>().value;
+
+        int casosfavorables = 0;
+
+        int totalDealerPoints = dealerVisibleCardValue + dealerHiddenCardValue;
+        if (totalDealerPoints > playerPoints) { casosfavorables++; }
+
+        int casosgeneral = 1;
+
+        foreach (int cardValue in values)
+        {
+            if (dealerVisibleCardValue + cardValue > playerPoints)
+            {
+                casosfavorables++;
+            }
+            casosgeneral++;
+        }
+
+        // Probabilidad de que el dealer gane
+        float probabilityDealerWins = (float)casosfavorables / casosgeneral;
+
+        Debug.Log(probabilityDealerWins);
+
+        return probabilityDealerWins;
+    }
+
+    public float CalculateProbabilityPlayer17to21(int playerPoints)
+    {
+        float probabilidadTotal = 0f;
+        int casosFavorables = 0;
+        int casos = 0;
+
+        // Calcular el número de cartas restantes de cada valor deseado
+        foreach (int valor in values)
+        {
+            if (valor+playerPoints>=17 && valor + playerPoints <=21)
+            {
+                casosFavorables++;
+            }
+            casos++;
+            
+        }
+        probabilidadTotal = (float)casosFavorables / casos;
+        Debug.Log(probabilidadTotal);
+
+        return probabilidadTotal;
+    }
+    public float CalculateProbabilityPlayerBust(int playerPoints)
+    {
+        float probabilidadTotal = 0f;
+        int casosFavorables = 0;
+        int casos = 0;
+
+        // Calcular el número de cartas restantes de cada valor deseado
+        foreach (int valor in values)
+        {
+            int totalPuntos = playerPoints + valor;
+
+            // Contabilizar las cartas que llevarían al jugador a exceder 21 puntos
+            if (totalPuntos > 21)
+            {
+                casosFavorables++;
+            }
+
+            // Contabilizar todas las cartas restantes
+            casos++;
+        }
+
+        probabilidadTotal = (float)casosFavorables / casos;
+        Debug.Log(probabilidadTotal);
+
+        return probabilidadTotal;
+    }
+
+
 
     void PushDealer()
     {
@@ -106,7 +201,8 @@ public class Deck : MonoBehaviour
          * Dependiendo de cómo se implemente ShuffleCards, es posible que haya que cambiar el índice.
          */
         dealer.GetComponent<CardHand>().Push(faces[cardIndex],values[cardIndex]);
-        cardIndex++;        
+        cardIndex++;
+        CalculateProbabilities();
     }
 
     void PushPlayer()
