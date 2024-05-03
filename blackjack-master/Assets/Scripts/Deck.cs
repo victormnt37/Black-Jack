@@ -15,18 +15,18 @@ public class Deck : MonoBehaviour
 
 
     public int[] values = new int[52];
-    int cardIndex = 0;    
-       
+    int cardIndex = 0;
+
     private void Awake()
-    {    
-        InitCardValues();        
+    {
+        InitCardValues();
 
     }
 
     private void Start()
     {
         ShuffleCards();
-        StartGame();        
+        StartGame();
     }
     private void InitCardValues()
     {
@@ -35,11 +35,11 @@ public class Deck : MonoBehaviour
             int cardNumber = i % 13; // Determina el número de la carta (0-12)
 
 
-            if (cardNumber==0 || cardNumber ==13 || cardNumber ==26 || cardNumber ==39) 
+            if (cardNumber == 0 || cardNumber == 13 || cardNumber == 26 || cardNumber == 39)
             {
                 values[i] = 11;
             }
-            else if(cardNumber < 9)
+            else if (cardNumber < 9)
             {
                 values[i] = cardNumber + 1; // Las cartas del 2 al 10 tienen el valor de su número
             }
@@ -81,9 +81,6 @@ public class Deck : MonoBehaviour
         {
             PushPlayer();
             PushDealer();
-            /*TODO:
-             * Si alguno de los dos obtiene Blackjack, termina el juego y mostramos mensaje
-             */
         }
         if (player.GetComponent<CardHand>().points == 21 || dealer.GetComponent<CardHand>().points == 21)
         {
@@ -96,7 +93,7 @@ public class Deck : MonoBehaviour
     {
         // Obtener la puntuación actual del jugador y la carta visible del crupier
         int playerPoints = player.GetComponent<CardHand>().points;
-        if (dealer.GetComponent<CardHand>().cards.Count >1)
+        if (dealer.GetComponent<CardHand>().cards.Count > 1)
         {
 
 
@@ -110,9 +107,9 @@ public class Deck : MonoBehaviour
             float probabilityPlayerBust = CalculateProbabilityPlayerBust(playerPoints);
 
             // Actualizar el texto del objeto de texto con las probabilidades calculadas
-            probMessage.text = "Probabilidad de que el dealer tenga más puntuación que el jugador: " + probabilityDealerWins.ToString("P2") +
-                            "\nProbabilidad de que el jugador obtenga entre 17 y 21: " + probabilityPlayer17to21.ToString("P2") +
-                            "\nProbabilidad de que el jugador obtenga más de 21: " + probabilityPlayerBust.ToString("P2");
+            probMessage.text = "Deal > Play " + probabilityDealerWins.ToString("P2") +
+                            "\n 17 <= x <= 21: " + probabilityPlayer17to21.ToString("P2") +
+                            "\n x > 21: " + probabilityPlayerBust.ToString("P2");
         }
     }
 
@@ -154,12 +151,12 @@ public class Deck : MonoBehaviour
         // Calcular el número de cartas restantes de cada valor deseado
         foreach (int valor in values)
         {
-            if (valor+playerPoints>=17 && valor + playerPoints <=21)
+            if (valor + playerPoints >= 17 && valor + playerPoints <= 21)
             {
                 casosFavorables++;
             }
             casos++;
-            
+
         }
         probabilidadTotal = (float)casosFavorables / casos;
         Debug.Log(probabilidadTotal);
@@ -200,7 +197,7 @@ public class Deck : MonoBehaviour
         /*TODO:
          * Dependiendo de cómo se implemente ShuffleCards, es posible que haya que cambiar el índice.
          */
-        dealer.GetComponent<CardHand>().Push(faces[cardIndex],values[cardIndex]);
+        dealer.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]);
         cardIndex++;
         CalculateProbabilities();
     }
@@ -213,14 +210,14 @@ public class Deck : MonoBehaviour
         player.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]/*,cardCopy*/);
         cardIndex++;
         CalculateProbabilities();
-    }       
+    }
 
     public void Hit()
     {
         /*TODO: 
          * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
          */
-        
+
         //Repartimos carta al jugador
         PushPlayer();
 
@@ -257,7 +254,7 @@ public class Deck : MonoBehaviour
         stickButton.interactable = true;
         finalMessage.text = "";
         player.GetComponent<CardHand>().Clear();
-        dealer.GetComponent<CardHand>().Clear();          
+        dealer.GetComponent<CardHand>().Clear();
         cardIndex = 0;
         ShuffleCards();
         StartGame();
