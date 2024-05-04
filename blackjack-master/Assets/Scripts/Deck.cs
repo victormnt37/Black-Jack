@@ -194,9 +194,6 @@ public class Deck : MonoBehaviour
 
     void PushDealer()
     {
-        /*TODO:
-         * Dependiendo de cómo se implemente ShuffleCards, es posible que haya que cambiar el índice.
-         */
         dealer.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]);
         cardIndex++;
         CalculateProbabilities();
@@ -204,9 +201,6 @@ public class Deck : MonoBehaviour
 
     void PushPlayer()
     {
-        /*TODO:
-         * Dependiendo de cómo se implemente ShuffleCards, es posible que haya que cambiar el índice.
-         */
         player.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]/*,cardCopy*/);
         cardIndex++;
         CalculateProbabilities();
@@ -214,10 +208,6 @@ public class Deck : MonoBehaviour
 
     public void Hit()
     {
-        /*TODO: 
-         * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
-         */
-
         //Repartimos carta al jugador
         PushPlayer();
 
@@ -228,8 +218,6 @@ public class Deck : MonoBehaviour
             // El jugador se pasa de 21, terminar el juego
             EndGame();
         }
-
-
     }
 
     public void Stand()
